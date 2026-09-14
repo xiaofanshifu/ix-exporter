@@ -34,7 +34,6 @@ jobs:
 
   release:
     needs: build
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -43,10 +42,15 @@ jobs:
         with:
           path: dist
 
-      - name: Publish release
+      - name: Publish to rolling release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('build-{0}', github.run_number) }}
+          tag_name: latest-builds
+          make_latest: true
+          body: |
+            Auto-published after every successful build.
+            - Commit: ${{ github.sha }}
+            - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           files: |
             dist/ix-exporter-linux-amd64/ix-exporter-linux-amd64
             dist/ix-exporter-linux-arm64/ix-exporter-linux-arm64
